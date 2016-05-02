@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <string.h>
 #include "rand.h"
 
 #define ISWAP(a,b) int tmp = (a);(a)=(b);(b)=tmp
@@ -19,6 +20,8 @@ static double prob_mutation = 0;
 
 static void sys_init(int, int);
 static void read_input(FILE *fp);
+static inline int *copy_individual(int *dest, const int *src);
+static inline int get_individual_fitness(const int *individual);
 
 static void
 sys_init(int _individual_len, int _population_size) {
@@ -78,7 +81,9 @@ print_population() {
 		printf("[I #%03d] ", i);
 		for(j=1;j<=individual_len; j++) {
 			printf("%d",population[i][j]);
-		}printf("\n");
+		}
+		int fit = get_individual_fitness(population[i]);
+		printf(" (%d)\n", fit);
 	}
 }
 
@@ -250,7 +255,7 @@ main(int argc, char **argv) {
 	int fitness_max=0, fitness_avg=0;
 	long run_iter_cnt=0;
 
-	if(argc>=2) {
+	if(argc>=2 && strcmp(argv[1], "DEFAULT")) {
 		run_iter_cnt = strtol(argv[1], NULL, 10);
 		if(run_iter_cnt==0){
 			printf("Usage : %s [iteration count]\n", argv[0]);
@@ -275,6 +280,7 @@ main(int argc, char **argv) {
 		generation++;
 		get_fitness ((const int **)population, &fitness_max, &fitness_avg);
 	}
+	print_population();
 
 	/* Free heap. */
 	for(i=0; i<population_size; i++)
